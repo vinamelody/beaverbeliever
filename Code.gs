@@ -8,7 +8,9 @@ var ColsEnum = {
   "english": 10,
   "mandarin": 11,
   "hokkien": 12,
-  "cantonese": 13
+  "cantonese": 13,
+  "homePostal": 14,
+  "officePostal": 15
 };
 Object.freeze(ColsEnum);
 
@@ -129,4 +131,13 @@ function assignLanguage(english, mandarin, hokkien, cantonese) {
         
 function isLanguageMatching(serviceLanguage, beaverLanguage) {
   return (beaverLanguage.indexOf(serviceLanguage) !== -1) 
+};
+
+
+
+function testDistrict() {
+  var id = 38
+  var d = districtLookup(id)
+  Logger.log("x=" + d.xValue)
+    Logger.log("y=" + d.yValue)
 }
