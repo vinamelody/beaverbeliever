@@ -4,12 +4,17 @@ var ColsEnum = {
   "name": 1,
   "lastDateServed": 4,
   "blockDateStart": 6,
-  "blockDateEnd": 7
+  "blockDateEnd": 7,
+  "english": 10,
+  "mandarin": 11,
+  "hokkien": 12,
+  "cantonese": 13
 };
 Object.freeze(ColsEnum);
 
 var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds;
-var MyColumnHeader = ['Name', 'Days score', 'Availability'];
+var MyColumnHeader = ['Name', 'Days score', 'Availability', 'Language'];
+var yes = /Yes/;
 
 var Service = function(serviceDate, language, wakeCode) {
   this.serviceDate = serviceDate;
@@ -17,11 +22,12 @@ var Service = function(serviceDate, language, wakeCode) {
   this.wakeCode = wakeCode;
 }
 
-var Beaver = function(name, lastDateServed, blockOutStart, blockOutEnd) {
+var Beaver = function(name, lastDateServed, blockOutStart, blockOutEnd, language) {
   this.name = name;
   this.lastDateServed = lastDateServed;
   this.blockOutStart = blockOutStart;
   this.blockOutEnd = blockOutEnd;
+  this.language = language;
 };
 
 function getBeavers() {  
@@ -33,21 +39,28 @@ function getBeavers() {
     resultSheet.appendRow(MyColumnHeader)
     
     // Create a service object
-    var service = new Service("19 May 2018", "English", "380126")
+    var service = new Service("19 May 2018", "e", "380126")
     
     var data = dataSheet.getDataRange().getValues();
     for (var row = 1; row < data.length; row++) {
       // Logger.log('Beaver ' + data[row][1]);
+      var isEnglish = yes.test(data[row][ColsEnum.english])
+      var isMandarin = yes.test(data[row][ColsEnum.mandarin])
+      var isHokkien = yes.test(data[row][ColsEnum.hokkien])
+      var isCantonese = yes.test(data[row][ColsEnum.cantonese])
+      var lang = assignLanguage(isEnglish, isMandarin, isHokkien, isCantonese)
       var beaver = new Beaver(
         data[row][ColsEnum.name],
         data[row][ColsEnum.lastDateServed],
         data[row][ColsEnum.blockDateStart],
-        data[row][ColsEnum.blockDateEnd]
+        data[row][ColsEnum.blockDateEnd],
+        lang
       );
       resultSheet.appendRow([
         beaver.name, 
         getDayScore(beaver.lastDateServed, service.serviceDate),
         ((isAvailable(service.serviceDate, beaver.blockOutStart, beaver.blockOutEnd))? '1' : '0'),
+        ((isLanguageMatching(service.language, beaver.language)) ? '1' : '0'),
       ]);
     }
   }
@@ -56,7 +69,6 @@ function getBeavers() {
 // Helper Functions
 
 function countDaysBetween(firstDate, secondDate) {
-
   var first = new Date(firstDate)
   first.setHours(0,0,0)
   var second = new Date(secondDate)
@@ -87,13 +99,34 @@ function getDayScore(firstDate, secondDate) {
 }
 
 function isAvailable(serviceDate, blockDateStart, blockDateEnd) {
-  var check = new Date(serviceDate)
-  var dStart = new Date(blockDateStart)
-  var dEnd = new Date(blockDateEnd)
+  var check = new Date(serviceDate);
+  var dStart = new Date(blockDateStart);
+  var dEnd = new Date(blockDateEnd);
     
   if (check >= dStart && check < dEnd) {
-    return false
+    return false;
   } else {
-    return true
+    return true;
   }
+};
+
+function assignLanguage(english, mandarin, hokkien, cantonese) {
+  var lang = "";
+  if (Boolean(english)) {
+    lang += 'e';
+  }
+  if (mandarin) {
+    lang += 'm';
+  }
+  if (hokkien) {
+    lang += 'h';
+  }
+  if (cantonese) {
+    lang += 'c';
+  }
+  return lang
+}
+        
+function isLanguageMatching(serviceLanguage, beaverLanguage) {
+  return (beaverLanguage.indexOf(serviceLanguage) !== -1) 
 }
