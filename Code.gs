@@ -15,7 +15,7 @@ var ColsEnum = {
 Object.freeze(ColsEnum);
 
 var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds;
-var MyColumnHeader = ['Name', 'Days score', 'Availability', 'Language'];
+var MyColumnHeader = ['Name', 'Days score', 'Availability', 'Language', 'Distance score'];
 var yes = /Yes/;
 
 var Service = function(serviceDate, language, wakeCode) {
@@ -51,6 +51,8 @@ function getBeavers() {
       var isHokkien = yes.test(data[row][ColsEnum.hokkien])
       var isCantonese = yes.test(data[row][ColsEnum.cantonese])
       var lang = assignLanguage(isEnglish, isMandarin, isHokkien, isCantonese)
+      var homePostalCode = !isEmpty(data[row][ColsEnum.homePostal]) ? data[row][ColsEnum.homePostal] : "0"
+      var officePostalCode = !isEmpty(data[row][ColsEnum.officePostal]) ? data[row][ColsEnum.officePostal] : "0"
       var beaver = new Beaver(
         data[row][ColsEnum.name],
         data[row][ColsEnum.lastDateServed],
@@ -63,12 +65,17 @@ function getBeavers() {
         getDayScore(beaver.lastDateServed, service.serviceDate),
         ((isAvailable(service.serviceDate, beaver.blockOutStart, beaver.blockOutEnd))? '1' : '0'),
         ((isLanguageMatching(service.language, beaver.language)) ? '1' : '0'),
+        getDistanceScore(service.wakeCode, homePostalCode, officePostalCode)
       ]);
     }
   }
 }
 
 // Helper Functions
+
+function isEmpty(str) {
+  return (!str || 0 === str.length);
+}
 
 function countDaysBetween(firstDate, secondDate) {
   var first = new Date(firstDate)

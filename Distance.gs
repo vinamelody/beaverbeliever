@@ -19,16 +19,11 @@ function calculateDistance(wakeDistrict, district) {
   return d
 }
 
-function getSmallestDistance(wakePostalCode, homePostalCode, officePostalCode) {
+function getDistanceScore(wakePostalCode, homePostalCode, officePostalCode) {
   homeDistrictId = calculateDistrict(homePostalCode)
   homeDistrict = districtLookup(homeDistrictId)
   Logger.log("Home district id = " + homeDistrictId)
   Logger.log("Home district x=" + homeDistrict.xValue + " y=" + homeDistrict.yValue)
-  
-  officeDistrictId = calculateDistrict(officePostalCode)  
-  officeDistrict = districtLookup(officeDistrictId)
-  Logger.log("Office district id = " + officeDistrictId)
-  Logger.log("Office district x=" + officeDistrict.xValue + " y=" + officeDistrict.yValue)
   
   wakeDistrictId = calculateDistrict(wakePostalCode)  
   wakeDistrict = districtLookup(wakeDistrictId)
@@ -37,15 +32,23 @@ function getSmallestDistance(wakePostalCode, homePostalCode, officePostalCode) {
   Logger.log("Wake district x=" + wakeDistrict.xValue + " y=" + wakeDistrict.yValue)
   
   distanceFromHome = calculateDistance(wakeDistrict, homeDistrict)
-  distanceFromOffice = calculateDistance(wakeDistrict, officeDistrict)
   
-  Logger.log("Distance from home = " + distanceFromHome)
-  Logger.log("Distance from office = " + distanceFromOffice)
-  
-  if (distanceFromHome < distanceFromOffice) {
+  if (officePostalCode == "0") {
     return distanceFromHome
   } else {
-    return distanceFromOffice
+      officeDistrictId = calculateDistrict(officePostalCode)  
+      officeDistrict = districtLookup(officeDistrictId)
+      Logger.log("Office district id = " + officeDistrictId)
+      Logger.log("Office district x=" + officeDistrict.xValue + " y=" + officeDistrict.yValue)
+      
+      distanceFromOffice = calculateDistance(wakeDistrict, officeDistrict)
+      Logger.log("Distance from home = " + distanceFromHome)
+      Logger.log("Distance from office = " + distanceFromOffice)
+        if (distanceFromHome < distanceFromOffice) {
+          return distanceFromHome
+        } else {
+          return distanceFromOffice
+        }
   }
 }
 
@@ -54,7 +57,7 @@ function testSmallestDistance() {
   var homePostalCode = "389758"
   var officePostalCode = "088540"
   
-  getSmallestDistance(wakePostalCode, homePostalCode, officePostalCode)
+  getDistanceScore(wakePostalCode, homePostalCode, officePostalCode)
 }
 
 function showAlert(message) {
