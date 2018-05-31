@@ -15,7 +15,7 @@ var ColsEnum = {
 Object.freeze(ColsEnum);
 
 var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds;
-var MyColumnHeader = ['Name', 'Days score', 'Availability', 'Language', 'Distance score'];
+var MyColumnHeader = ['Name', 'Days score', 'Availability', 'Language', 'Distance score', 'Rating'];
 var yes = /Yes/;
 
 var Service = function(serviceDate, language, wakeCode) {
@@ -34,14 +34,11 @@ var Beaver = function(name, lastDateServed, blockOutStart, blockOutEnd, language
 
 function getBeavers() {  
   var dataSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Step 1 - Master List");
-  var resultSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Recommendation");
-  if (dataSheet != null && resultSheet != null) {
-    // Clear sheet and make header
-    resultSheet.clear()
-    resultSheet.appendRow(MyColumnHeader)
-    
+  if (dataSheet != null) {    
     // Create a service object
     var service = new Service("19 May 2018", "e", "380126")
+    
+    var recommendation = [];
     
     var data = dataSheet.getDataRange().getValues();
     for (var row = 1; row < data.length; row++) {
@@ -60,14 +57,30 @@ function getBeavers() {
         data[row][ColsEnum.blockDateEnd],
         lang
       );
-      resultSheet.appendRow([
-        beaver.name, 
-        getDayScore(beaver.lastDateServed, service.serviceDate),
-        ((isAvailable(service.serviceDate, beaver.blockOutStart, beaver.blockOutEnd))? '1' : '0'),
-        ((isLanguageMatching(service.language, beaver.language)) ? '1' : '0'),
-        getDistanceScore(service.wakeCode, homePostalCode, officePostalCode)
-      ]);
+      
+      var dayScore = getDayScore(beaver.lastDateServed, service.serviceDate);
+      var availabilityScore = ((isAvailable(service.serviceDate, beaver.blockOutStart, beaver.blockOutEnd))? '1' : '0');
+      var languageScore = ((isLanguageMatching(service.language, beaver.language)) ? '1' : '0');
+      var distanceScore = getDistanceScore(service.wakeCode, homePostalCode, officePostalCode)
+      var rating = getRating(distanceScore, languageScore, dayScore, availabilityScore);
+      var ratingLabel = mapRating(languageScore, availabilityScore, rating);
+      
+      var beaverData = {
+        name: beaver.name,
+        dayScore: dayScore,
+        availabilityScore: availabilityScore,
+        languageScore: languageScore,
+        distanceScore: distanceScore,
+        rating: rating
+      };
+      
+      recommendation.push(beaverData);
+      //Logger.log("Beaver = " + beaverData.name)
     }
+    recommendation.sort(function(o1, o2) {
+      return parseFloat(o2.rating) - parseFloat(o1.rating)
+    })
+    generateRecommendation(recommendation)
   }
 }
 
