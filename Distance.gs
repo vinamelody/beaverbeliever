@@ -22,14 +22,14 @@ function calculateDistance(wakeDistrict, district) {
 function getDistanceScore(wakePostalCode, homePostalCode, officePostalCode) {
   homeDistrictId = calculateDistrict(homePostalCode)
   homeDistrict = districtLookup(homeDistrictId)
-  Logger.log("Home district id = " + homeDistrictId)
-  Logger.log("Home district x=" + homeDistrict.xValue + " y=" + homeDistrict.yValue)
+  //Logger.log("Home district id = " + homeDistrictId)
+  //Logger.log("Home district x=" + homeDistrict.xValue + " y=" + homeDistrict.yValue)
   
   wakeDistrictId = calculateDistrict(wakePostalCode)  
   wakeDistrict = districtLookup(wakeDistrictId)
   
-  Logger.log("Wake district id = " + wakeDistrictId)
-  Logger.log("Wake district x=" + wakeDistrict.xValue + " y=" + wakeDistrict.yValue)
+  //Logger.log("Wake district id = " + wakeDistrictId)
+  //Logger.log("Wake district x=" + wakeDistrict.xValue + " y=" + wakeDistrict.yValue)
   
   distanceFromHome = calculateDistance(wakeDistrict, homeDistrict)
   
@@ -38,12 +38,12 @@ function getDistanceScore(wakePostalCode, homePostalCode, officePostalCode) {
   } else {
       officeDistrictId = calculateDistrict(officePostalCode)  
       officeDistrict = districtLookup(officeDistrictId)
-      Logger.log("Office district id = " + officeDistrictId)
-      Logger.log("Office district x=" + officeDistrict.xValue + " y=" + officeDistrict.yValue)
+      // Logger.log("Office district id = " + officeDistrictId)
+      // Logger.log("Office district x=" + officeDistrict.xValue + " y=" + officeDistrict.yValue)
       
       distanceFromOffice = calculateDistance(wakeDistrict, officeDistrict)
-      Logger.log("Distance from home = " + distanceFromHome)
-      Logger.log("Distance from office = " + distanceFromOffice)
+      // Logger.log("Distance from home = " + distanceFromHome)
+      // Logger.log("Distance from office = " + distanceFromOffice)
         if (distanceFromHome < distanceFromOffice) {
           return distanceFromHome
         } else {
