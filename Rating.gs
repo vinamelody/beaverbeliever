@@ -12,3 +12,26 @@ function testGetRating() {
   var rating = getRating(distanceScore, isLanguageMatching, dayScore, isAvailable)
   Logger.log("Rating = " + rating)
 }
+
+function generateRecommendationTable(array) {
+  Logger.log(array)
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Recommendation");
+  if (sheet != null) {
+    // Clear sheet and make header
+    sheet.clear()
+    sheet.appendRow(MyColumnHeader)
+    
+    for (var row = 0; row < array.length; row++) {
+      sheet.appendRow([
+        array[row].name, 
+        array[row].dayScore,
+        array[row].availabilityScore,
+        array[row].languageScore,
+        array[row].distanceScore,
+        array[row].rating
+      ]);
+    }
+  } else {
+    showAlert("Cannot find sheet name Recommendation");
+  }
+}
