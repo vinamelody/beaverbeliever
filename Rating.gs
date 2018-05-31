@@ -4,6 +4,21 @@ function getRating(distanceScore, isLanguageMatching, dayScore, isAvailable) {
   return (isAvailable * isLanguageMatching * (emphasisOnDay * dayScore + (1 - emphasisOnDay) * distanceScore))
 }
 
+function mapRating(isLanguageMatching, isAvailable, score) {
+  if (isLanguageMatching == 0) {
+    return "Language Mismatch"
+  }
+  if (isAvailable == 0) {
+    return "Block-out Period"
+  }
+  if (score < 30) { return "Last Resort" }
+  else if (score < 50) { return "Not Preferred" }
+  else if (score < 70) { return "OK-ish" }
+  else if (score < 85) { return "Preferred" }
+  else { return "Pick-ME!" }
+  
+}
+
 function testGetRating() {
   var distanceScore = 15.50754091
   var isLanguageMatching = 1
