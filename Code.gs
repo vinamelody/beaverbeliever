@@ -1,5 +1,6 @@
 // Created by Vina Melody
 
+// Constants
 var ColsEnum = {
   "name": 1,
   "lastDateServed": 4,
@@ -18,6 +19,7 @@ var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds;
 var MyColumnHeader = ['Name', 'Days score', 'Availability', 'Language', 'Distance score', 'Rating'];
 var yes = /Yes/;
 
+// Models
 var Service = function(serviceDate, language, wakeCode) {
   this.serviceDate = serviceDate;
   this.language = language;
@@ -32,11 +34,14 @@ var Beaver = function(name, lastDateServed, blockOutStart, blockOutEnd, language
   this.language = language;
 };
 
-function getBeavers() {  
+// Functions
+
+function getBeavers(request) {  
   var dataSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Step 1 - Master List");
   if (dataSheet != null) {    
     // Create a service object
-    var service = new Service("19 May 2018", "e", "380126")
+    // var service = new Service("19 May 2018", "e", "380126")
+    var service = new Service(request.serviceDate, request.language, request.wakeCode)
     
     var recommendation = [];
     
@@ -80,7 +85,7 @@ function getBeavers() {
     recommendation.sort(function(o1, o2) {
       return parseFloat(o2.rating) - parseFloat(o1.rating)
     })
-    generateRecommendation(recommendation)
+    generateRecommendationTable(recommendation)
   }
 }
 
