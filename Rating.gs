@@ -1,4 +1,6 @@
+// Constants
 var emphasisOnDay = 0.45
+var MyColumnHeader = ['Name', 'Days score', 'Availability', 'Language', 'Distance score', 'Rating', 'Assign?'];
 
 function getRating(distanceScore, isLanguageMatching, dayScore, isAvailable) {
   return (isAvailable * isLanguageMatching * (emphasisOnDay * dayScore + (1 - emphasisOnDay) * distanceScore))
@@ -29,24 +31,35 @@ function testGetRating() {
 }
 
 function generateRecommendationTable(array) {
-  Logger.log(array)
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Recommendation");
+  // Logger.log(array)
+  var dd = [];
+  for (var i=0; i<array.length; i++) {
+    dd.push([array[i].name, array[i].dayScore, array[i].availabilityScore, array[i].languageScore, array[i].distanceScore, array[i].rating])
+  }
+  
+  var isAssignRule = SpreadsheetApp.newDataValidation().requireValueInList(['Yes'], true).build();
+  // Logger.log(dd)
+  var document = SpreadsheetApp.openById(documentId);
+  var sheet = document.getSheetByName("Recommendation");
   if (sheet != null) {
     // Clear sheet and make header
     sheet.clear()
+    
+    // write data to sheet
     sheet.appendRow(MyColumnHeader)
     
-    for (var row = 0; row < array.length; row++) {
-      sheet.appendRow([
-        array[row].name, 
-        array[row].dayScore,
-        array[row].availabilityScore,
-        array[row].languageScore,
-        array[row].distanceScore,
-        array[row].rating
-      ]);
-    }
+    var range = sheet.getRange(2, 1, array.length, 6)
+    range.setValues(dd);
+    
+    var assignColumn = sheet.getRange(2, 7, array.length, 1)
+    assignColumn.setDataValidation(isAssignRule);
+    
   } else {
     showAlert("Cannot find sheet name Recommendation");
   }
+}
+
+function testDidCreateNewService() {
+  var testService = new Service("6/22/2018", "e", "345678");
+  getBeavers(testService);
 }
