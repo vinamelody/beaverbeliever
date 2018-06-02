@@ -19,4 +19,11 @@ function mapLanguage(lang) {
   else if (lang == "Hokkien") { return "h" }
 }
 
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu("Assignment").addItem("Confirm Assignment", 'handleAssign').addToUi()
+}
 
+function handleAssign() {
+  showAlert("Are you sure?")
+}
