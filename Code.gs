@@ -1,6 +1,7 @@
 // Created by Vina Melody
 
 // Constants
+var documentId = "Replace with your document id"
 var ColsEnum = {
   "name": 1,
   "lastDateServed": 4,
@@ -36,12 +37,17 @@ var Beaver = function(name, lastDateServed, blockOutStart, blockOutEnd, language
 
 // Functions
 
-function getBeavers(request) {  
-  var dataSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Step 1 - Master List");
+function getBeavers(request) {
+  var document = SpreadsheetApp.openById(documentId);
+  var dataSheet = document.getSheetByName("Step 1 - Master List")
   if (dataSheet != null) {    
     // Create a service object
     // var service = new Service("19 May 2018", "e", "380126")
     var service = new Service(request.serviceDate, request.language, request.wakeCode)
+    
+    Logger.log("2 Service date = %s", service.serviceDate);
+    Logger.log("2 Language = %s", service.language);
+    Logger.log("2 Wake postal code = %s", service.wakeCode);
     
     var recommendation = [];
     
@@ -85,7 +91,10 @@ function getBeavers(request) {
     recommendation.sort(function(o1, o2) {
       return parseFloat(o2.rating) - parseFloat(o1.rating)
     })
+    Logger.log("Recommendation sorted")
     generateRecommendationTable(recommendation)
+  } else {
+    showAlert("Cannot find Step 1 - Master List");
   }
 }
 
@@ -164,5 +173,5 @@ function testDistrict() {
   var id = 38
   var d = districtLookup(id)
   Logger.log("x=" + d.xValue)
-    Logger.log("y=" + d.yValue)
+  Logger.log("y=" + d.yValue)
 }
