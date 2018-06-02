@@ -1,6 +1,6 @@
 // Constants
 var emphasisOnDay = 0.45
-var MyColumnHeader = ['Name', 'Days score', 'Availability', 'Language', 'Distance score', 'Rating', 'Assign?'];
+var MyColumnHeader = ['ID', 'Name', 'Days score', 'Availability', 'Language', 'Distance score', 'Rating', 'Assign?'];
 
 function getRating(distanceScore, isLanguageMatching, dayScore, isAvailable) {
   return (isAvailable * isLanguageMatching * (emphasisOnDay * dayScore + (1 - emphasisOnDay) * distanceScore))
@@ -34,7 +34,7 @@ function generateRecommendationTable(array) {
   // Logger.log(array)
   var dd = [];
   for (var i=0; i<array.length; i++) {
-    dd.push([array[i].name, array[i].dayScore, array[i].availabilityScore, array[i].languageScore, array[i].distanceScore, array[i].rating])
+    dd.push([array[i].id, array[i].name, array[i].dayScore, array[i].availabilityScore, array[i].languageScore, array[i].distanceScore, array[i].rating])
   }
   
   var isAssignRule = SpreadsheetApp.newDataValidation().requireValueInList(['Yes'], true).build();
@@ -48,10 +48,10 @@ function generateRecommendationTable(array) {
     // write data to sheet
     sheet.appendRow(MyColumnHeader)
     
-    var range = sheet.getRange(2, 1, array.length, 6)
+    var range = sheet.getRange(2, 1, array.length, 7)
     range.setValues(dd);
     
-    var assignColumn = sheet.getRange(2, 7, array.length, 1)
+    var assignColumn = sheet.getRange(2, 8, array.length, 1)
     assignColumn.setDataValidation(isAssignRule);
     
   } else {
