@@ -3,10 +3,14 @@
 // Constants
 var documentId = "Replace with your document id"
 var ColsEnum = {
+  "id": 0,
   "name": 1,
+  "contact": 2,
   "lastDateServed": 4,
   "blockDateStart": 6,
   "blockDateEnd": 7,
+  "remarks": 8,
+  "role": 9,
   "english": 10,
   "mandarin": 11,
   "hokkien": 12,
@@ -17,7 +21,6 @@ var ColsEnum = {
 Object.freeze(ColsEnum);
 
 var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds;
-var MyColumnHeader = ['Name', 'Days score', 'Availability', 'Language', 'Distance score', 'Rating'];
 var yes = /Yes/;
 
 // Models
@@ -27,7 +30,8 @@ var Service = function(serviceDate, language, wakeCode) {
   this.wakeCode = wakeCode;
 }
 
-var Beaver = function(name, lastDateServed, blockOutStart, blockOutEnd, language) {
+var Beaver = function(id, name, lastDateServed, blockOutStart, blockOutEnd, language) {
+  this.id = id;
   this.name = name;
   this.lastDateServed = lastDateServed;
   this.blockOutStart = blockOutStart;
@@ -45,10 +49,6 @@ function getBeavers(request) {
     // var service = new Service("19 May 2018", "e", "380126")
     var service = new Service(request.serviceDate, request.language, request.wakeCode)
     
-    Logger.log("2 Service date = %s", service.serviceDate);
-    Logger.log("2 Language = %s", service.language);
-    Logger.log("2 Wake postal code = %s", service.wakeCode);
-    
     var recommendation = [];
     
     var data = dataSheet.getDataRange().getValues();
@@ -62,6 +62,7 @@ function getBeavers(request) {
       var homePostalCode = !isEmpty(data[row][ColsEnum.homePostal]) ? data[row][ColsEnum.homePostal] : "0"
       var officePostalCode = !isEmpty(data[row][ColsEnum.officePostal]) ? data[row][ColsEnum.officePostal] : "0"
       var beaver = new Beaver(
+        data[row][ColsEnum.id],
         data[row][ColsEnum.name],
         data[row][ColsEnum.lastDateServed],
         data[row][ColsEnum.blockDateStart],
@@ -74,15 +75,24 @@ function getBeavers(request) {
       var languageScore = ((isLanguageMatching(service.language, beaver.language)) ? '1' : '0');
       var distanceScore = getDistanceScore(service.wakeCode, homePostalCode, officePostalCode)
       var rating = getRating(distanceScore, languageScore, dayScore, availabilityScore);
-      var ratingLabel = mapRating(languageScore, availabilityScore, rating);
+      //var ratingLabel = mapRating(languageScore, availabilityScore, rating);
+      
+      var contact = data[row][ColsEnum.contact]
+      var role = data[row][ColsEnum.role]
+      var remarks = data[row][ColsEnum.remarks]
       
       var beaverData = {
+        id: beaver.id,
         name: beaver.name,
         dayScore: dayScore,
         availabilityScore: availabilityScore,
         languageScore: languageScore,
         distanceScore: distanceScore,
-        rating: rating
+        rating: rating,
+        role: role,
+        remarks: remarks,
+        contact: contact,
+        daysSinceLastServed: countDaysBetween(beaver.lastDateServed, service.serviceDate)
       };
       
       recommendation.push(beaverData);
