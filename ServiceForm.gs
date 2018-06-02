@@ -8,7 +8,7 @@ function didCreateNewService(s) {
   Logger.log("Language = %s", serviceLanguage);
   Logger.log("Wake postal code = %s", wakePostalCode);
   
-  var service = Service(serviceDate, serviceLanguage, wakePostalCode);
+  var service = new Service(serviceDate, serviceLanguage, wakePostalCode);
   getBeavers(service);
 }
 
@@ -20,7 +20,3 @@ function mapLanguage(lang) {
 }
 
 
-function testDidCreateNewService() {
-  var testService = new Service("6/22/2018", "e", "98765");
-  getBeavers(testService);
-}
