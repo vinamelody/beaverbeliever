@@ -1,40 +1,34 @@
 // Constants
 var emphasisOnDay = 0.45
-var MyColumnHeader = ['ID', 'Name', 'Days score', 'Availability', 'Language', 'Distance score', 'Rating', 'Assign?'];
+var MyColumnHeader = ['ID', 'Name', 'Role', 'Days Since Last Service', 'Recommendation', 'Assign?', 'Remarks'];
 
 function getRating(distanceScore, isLanguageMatching, dayScore, isAvailable) {
   return (isAvailable * isLanguageMatching * (emphasisOnDay * dayScore + (1 - emphasisOnDay) * distanceScore))
 }
 
-function mapRating(isLanguageMatching, isAvailable, score) {
+function mapRatingFormat(isLanguageMatching, isAvailable, score) {
   if (isLanguageMatching == 0) {
-    return "Language Mismatch"
+    return {color: "Gray", text: "Language Mismatch"}
   }
   if (isAvailable == 0) {
-    return "Block-out Period"
+    return {color: "Gray", text: "Block-out Period"}
   }
-  if (score < 30) { return "Last Resort" }
-  else if (score < 50) { return "Not Preferred" }
-  else if (score < 70) { return "OK-ish" }
-  else if (score < 85) { return "Preferred" }
-  else { return "Pick-ME!" }
-  
+  if (score < 30) { return {color: "Plum", text: "Last Resort" } }
+  else if (score < 50) { return {color: "Purple", text: "Not Preferred" } }
+  else if (score < 70) { return {color: "Yellow", text: "OK-ish" } }
+  else if (score < 85) { return {color: "Blue", text: "Preferred" } }
+  else { return {color: "Green", text: "Pick-ME!" } }
 }
 
-function testGetRating() {
-  var distanceScore = 15.50754091
-  var isLanguageMatching = 1
-  var isAvailable = 1
-  var dayScore = 100
-  var rating = getRating(distanceScore, isLanguageMatching, dayScore, isAvailable)
-  Logger.log("Rating = " + rating)
-}
 
 function generateRecommendationTable(array) {
+  var colorArray = [];  
   // Logger.log(array)
   var dd = [];
   for (var i=0; i<array.length; i++) {
-    dd.push([array[i].id, array[i].name, array[i].dayScore, array[i].availabilityScore, array[i].languageScore, array[i].distanceScore, array[i].rating])
+    var recommendationText = mapRatingFormat(array[i].languageScore, array[i].availabilityScore, array[i].rating)
+    dd.push([array[i].id, array[i].name, array[i].role, array[i].daysSinceLastServed, recommendationText.text, '', array[i].remarks])
+    colorArray.push(recommendationText.color)
   }
   
   var isAssignRule = SpreadsheetApp.newDataValidation().requireValueInList(['Yes'], true).build();
@@ -48,18 +42,23 @@ function generateRecommendationTable(array) {
     // write data to sheet
     sheet.appendRow(MyColumnHeader)
     
-    var range = sheet.getRange(2, 1, array.length, 7)
+    var range = sheet.getRange(2, 1, array.length, MyColumnHeader.length)
     range.setValues(dd);
     
-    var assignColumn = sheet.getRange(2, 8, array.length, 1)
-    assignColumn.setDataValidation(isAssignRule);
-    
+    var assignColumnNo = 6 // A = 1
+    var assignColumnRange = sheet.getRange(2, assignColumnNo, array.length, 1)
+    assignColumnRange.setDataValidation(isAssignRule);
+    beautifyRecommendationTable(colorArray);
   } else {
     showAlert("Cannot find sheet name Recommendation");
   }
 }
 
-function testDidCreateNewService() {
-  var testService = new Service("6/22/2018", "e", "345678");
-  getBeavers(testService);
+function testGetRating() {
+  var distanceScore = 15.50754091
+  var isLanguageMatching = 1
+  var isAvailable = 1
+  var dayScore = 100
+  var rating = getRating(distanceScore, isLanguageMatching, dayScore, isAvailable)
+  Logger.log("Rating = " + rating)
 }
