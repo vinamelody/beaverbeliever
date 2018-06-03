@@ -27,3 +27,32 @@ function onOpen() {
 function handleAssign() {
   showAlert("Are you sure?")
 }
+
+// Generate Edit Url link to form
+// Sheet
+var sheetName = 'Service';
+var columnName = 'Edit Url';
+
+// Responses starting row
+var startRow = 2;
+
+function getEditResponseUrls(){
+  var document = SpreadsheetApp.openById(getDocumentId());
+  var sheet = document.getSheetByName(sheetName);
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues(); 
+  var columnIndex = headers[0].indexOf(columnName);
+  var form = FormApp.openById(formId);
+  var data = sheet.getDataRange().getValues();  
+
+  for(var i = startRow-1; i < data.length; i++) {
+      if(data[i][0] && !data[i][columnIndex]) {
+
+          var timestamp = data[i][0];
+          var formSubmitted = form.getResponses(timestamp);
+          if(formSubmitted.length < 1) continue;
+
+          var editResponseUrl = formSubmitted[0].getEditResponseUrl();
+          sheet.getRange(i+1, columnIndex+1).setValue(editResponseUrl);
+      }
+  }
+}
