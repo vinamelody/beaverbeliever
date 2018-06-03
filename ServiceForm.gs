@@ -36,6 +36,7 @@ var columnName = 'Edit Url';
 // Responses starting row
 var startRow = 2;
 
+// This is to generate all edit urls
 function getEditResponseUrls(){
   var document = SpreadsheetApp.openById(getDocumentId());
   var sheet = document.getSheetByName(sheetName);
@@ -56,3 +57,26 @@ function getEditResponseUrls(){
       }
   }
 }
+
+// This is to generate only the newly submitted response
+function getNewEditResponseUrls() {
+    var document = SpreadsheetApp.openById(getDocumentId());
+    var sheet = document.getSheetByName(sheetName);
+    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues(); 
+    var columnIndex = headers[0].indexOf(columnName);
+    var form = FormApp.openById(formId);
+    
+    var timestamp = sheet.getRange(sheet.getLastRow(), 1).getValue()
+    Logger.log(timestamp)
+    
+    var formSubmitted = form.getResponses(timestamp)
+    Logger.log(formSubmitted)
+  
+    var editResponseUrl = formSubmitted[0].getEditResponseUrl();
+    Logger.log(editResponseUrl)
+    
+    var editUrlCell = sheet.getRange(sheet.getLastRow(), sheet.getLastColumn())
+    editUrlCell.setValue(editResponseUrl)
+    
+  }
+  
