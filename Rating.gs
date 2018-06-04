@@ -1,6 +1,6 @@
 // Constants
 var emphasisOnDay = 0.45
-var MyColumnHeader = ['ID', 'Name', 'Role', 'Days Since Last Service', 'Recommendation', 'Assign?', 'Remarks'];
+var MyColumnHeader = ['ID', 'Name', 'Contact', 'Role', 'Days Since Last Service', 'Recommendation', 'Assign?', 'Remarks'];
 
 function getRating(distanceScore, isLanguageMatching, dayScore, isAvailable) {
   return (isAvailable * isLanguageMatching * (emphasisOnDay * dayScore + (1 - emphasisOnDay) * distanceScore))
@@ -28,7 +28,7 @@ function generateRecommendationTable(array, service) {
   var dd = [];
   for (var i=0; i<array.length; i++) {
     var recommendationText = mapRatingFormat(array[i].languageScore, array[i].availabilityScore, array[i].rating)
-    dd.push([array[i].id, array[i].name, array[i].role, array[i].daysSinceLastServed, recommendationText.text, '', array[i].remarks])
+    dd.push([array[i].id, array[i].name, array[i].contact, array[i].role, array[i].daysSinceLastServed, recommendationText.text, '', array[i].remarks])
     colorArray.push(recommendationText.color)
   }
   
@@ -40,7 +40,9 @@ function generateRecommendationTable(array, service) {
     // Clear sheet and make header
     sheet.clear()
     
-    sheet.appendRow(['Service date', '', service.serviceDate]);
+    var formattedDate = Utilities.formatDate(new Date(service.serviceDate), "GMT+8", "EEEEEE, dd MMMM YYYY");
+    
+    sheet.appendRow(['Service date', '', formattedDate]);
     sheet.appendRow(['Wake postal code', '', service.wakeCode])
     sheet.appendRow(['Language', '', service.language])
     sheet.appendRow(['Pastor', '', service.pastor])
@@ -50,13 +52,14 @@ function generateRecommendationTable(array, service) {
     sheet.appendRow(MyColumnHeader)
     sheet.insertRows(sheet.getLastRow(), 2)
     
-    var range = sheet.getRange(7, 1, array.length, MyColumnHeader.length)
+    var startHeaderRow = 9
+    var range = sheet.getRange(startHeaderRow, 1, array.length, MyColumnHeader.length)
     range.setValues(dd);
     
-    var assignColumnNo = 6 // A = 1
-    var assignColumnRange = sheet.getRange(8, assignColumnNo, array.length, 1)
+    var assignColumnNo = 7 // A = 1
+    var assignColumnRange = sheet.getRange(startHeaderRow, assignColumnNo, array.length, 1)
     assignColumnRange.setDataValidation(isAssignRule);
-    //beautifyRecommendationTable(colorArray);
+    beautifyRecommendationTable(colorArray);
   } else {
     showAlert("Cannot find sheet name Recommendation");
   }
