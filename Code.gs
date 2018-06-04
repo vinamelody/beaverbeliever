@@ -1,7 +1,7 @@
 // Created by Vina Melody
 
 // Constants
-var documentId = "Replace with your document id"
+
 var ColsEnum = {
   "id": 0,
   "name": 1,
@@ -24,10 +24,12 @@ var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds;
 var yes = /Yes/;
 
 // Models
-var Service = function(serviceDate, language, wakeCode) {
+var Service = function(serviceDate, language, wakeCode, pastor, deceasedName) {
   this.serviceDate = serviceDate;
   this.language = language;
   this.wakeCode = wakeCode;
+  this.pastor = pastor;
+  this.deceasedName = deceasedName;
 }
 
 var Beaver = function(id, name, lastDateServed, blockOutStart, blockOutEnd, language) {
@@ -41,14 +43,14 @@ var Beaver = function(id, name, lastDateServed, blockOutStart, blockOutEnd, lang
 
 // Functions
 
-function getBeavers(request) {
+function getBeavers(service) {
+  setProperties()
+  var documentProperties = PropertiesService.getDocumentProperties();
+  var documentId = documentProperties.getProperty('DOCUMENT_ID') 
+  Logger.log("Document id=" + documentId)
   var document = SpreadsheetApp.openById(documentId);
   var dataSheet = document.getSheetByName("Step 1 - Master List")
-  if (dataSheet != null) {    
-    // Create a service object
-    // var service = new Service("19 May 2018", "e", "380126")
-    var service = new Service(request.serviceDate, request.language, request.wakeCode)
-    
+  if (dataSheet != null) {        
     var recommendation = [];
     
     var data = dataSheet.getDataRange().getValues();
@@ -72,7 +74,7 @@ function getBeavers(request) {
       
       var dayScore = getDayScore(beaver.lastDateServed, service.serviceDate);
       var availabilityScore = ((isAvailable(service.serviceDate, beaver.blockOutStart, beaver.blockOutEnd))? '1' : '0');
-      var languageScore = ((isLanguageMatching(service.language, beaver.language)) ? '1' : '0');
+      var languageScore = ((isLanguageMatching(mapLanguage(service.language), beaver.language)) ? '1' : '0');
       var distanceScore = getDistanceScore(service.wakeCode, homePostalCode, officePostalCode)
       var rating = getRating(distanceScore, languageScore, dayScore, availabilityScore);
       //var ratingLabel = mapRating(languageScore, availabilityScore, rating);
@@ -102,7 +104,7 @@ function getBeavers(request) {
       return parseFloat(o2.rating) - parseFloat(o1.rating)
     })
     Logger.log("Recommendation sorted")
-    generateRecommendationTable(recommendation)
+    generateRecommendationTable(recommendation, service)
   } else {
     showAlert("Cannot find Step 1 - Master List");
   }

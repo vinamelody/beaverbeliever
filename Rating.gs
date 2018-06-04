@@ -21,9 +21,10 @@ function mapRatingFormat(isLanguageMatching, isAvailable, score) {
 }
 
 
-function generateRecommendationTable(array) {
+function generateRecommendationTable(array, service) {
   var colorArray = [];  
   // Logger.log(array)
+  Logger.log(service)
   var dd = [];
   for (var i=0; i<array.length; i++) {
     var recommendationText = mapRatingFormat(array[i].languageScore, array[i].availabilityScore, array[i].rating)
@@ -33,25 +34,37 @@ function generateRecommendationTable(array) {
   
   var isAssignRule = SpreadsheetApp.newDataValidation().requireValueInList(['Yes'], true).build();
   // Logger.log(dd)
-  var document = SpreadsheetApp.openById(documentId);
+  var document = SpreadsheetApp.openById(getDocumentId());
   var sheet = document.getSheetByName("Recommendation");
   if (sheet != null) {
     // Clear sheet and make header
     sheet.clear()
     
+    sheet.appendRow(['Service date', '', service.serviceDate]);
+    sheet.appendRow(['Wake postal code', '', service.wakeCode])
+    sheet.appendRow(['Language', '', service.language])
+    sheet.appendRow(['Pastor', '', service.pastor])
+    sheet.appendRow(['Name of deceased', '', service.deceasedName])
+
     // write data to sheet
     sheet.appendRow(MyColumnHeader)
+    sheet.insertRows(sheet.getLastRow(), 2)
     
-    var range = sheet.getRange(2, 1, array.length, MyColumnHeader.length)
+    var range = sheet.getRange(7, 1, array.length, MyColumnHeader.length)
     range.setValues(dd);
     
     var assignColumnNo = 6 // A = 1
-    var assignColumnRange = sheet.getRange(2, assignColumnNo, array.length, 1)
+    var assignColumnRange = sheet.getRange(8, assignColumnNo, array.length, 1)
     assignColumnRange.setDataValidation(isAssignRule);
-    beautifyRecommendationTable(colorArray);
+    //beautifyRecommendationTable(colorArray);
   } else {
     showAlert("Cannot find sheet name Recommendation");
   }
+}
+
+function testDidCreateNewService() {
+  var testService = new Service("6/22/2018", "English", "345678", "Joash", "Kwang");
+  getBeavers(testService);
 }
 
 function testGetRating() {
