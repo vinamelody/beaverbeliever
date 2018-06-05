@@ -1,5 +1,6 @@
 function getAssignedBeavers() {
-  var assignColumn = 6
+  var assignColumn = 6 // ID = 0 in array
+  var nameColumn = 1
   var idColumn = 0
   var startAtRow = 9
   
@@ -8,23 +9,36 @@ function getAssignedBeavers() {
   if (sheet != null) {    
     var serviceDateCell = sheet.getRange("c1");
     var serviceDate = serviceDateCell.getValue();
+    var formattedDate = Utilities.formatDate(new Date(serviceDate), "GMT+8", "EEEEEE, dd MMMM YYYY");
     var data = sheet.getRange(startAtRow, 1, sheet.getLastRow(), sheet.getLastColumn()).getValues()
     var selectedBeaverIds = [];
+    var names = [];
     for (var row = 0; row < data.length; row++) {
       var isSelected = yes.test(data[row][assignColumn]);
       if (isSelected == true) {
         selectedBeaverIds.push(data[row][idColumn])
+        names.push(data[row][nameColumn])
       }
     }
     Logger.log("Selected = " + selectedBeaverIds)
+    var confirmationMessage = "Assign " + names + " for service date on " + formattedDate + " ?"
     
-    // for every id, update master list (id, serviceDate)
-    for (var u = 0; u < selectedBeaverIds.length; u++) {
-      updateMasterList(selectedBeaverIds[u], serviceDate)
-    }
+    var ui = SpreadsheetApp.getUi()
+    var alert = ui.alert("Confirm Assignment", confirmationMessage, ui.ButtonSet.YES_NO)
+    
+    if (alert == ui.Button.YES) {
+      confirmAssignment(selectedBeaverIds, serviceDate)
+    }    
   } else {
     showAlert("Cannot find sheet name Recommendation");
   }
+}
+function confirmAssignment(selectedBeaverIds, serviceDate) {
+  // for every id, update master list (id, serviceDate)
+    for (var u = 0; u < selectedBeaverIds.length; u++) {
+      updateMasterList(selectedBeaverIds[u], serviceDate)
+    }
+  showAlert("Master list updated")
 }
 
 function updateMasterList(id, serviceDate) {
