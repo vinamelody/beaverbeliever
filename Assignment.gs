@@ -6,7 +6,8 @@ function getAssignedBeavers() {
   
   var document = SpreadsheetApp.openById(getDocumentId());
   var sheet = document.getSheetByName("Recommendation");
-  if (sheet != null) {    
+  if (sheet != null) {
+    // To confirmAssignment
     var serviceDateCell = sheet.getRange("c1");
     var serviceDate = serviceDateCell.getValue();
     var formattedDate = Utilities.formatDate(new Date(serviceDate), "GMT+8", "EEEEEE, dd MMMM YYYY");
@@ -20,14 +21,21 @@ function getAssignedBeavers() {
         names.push(data[row][nameColumn])
       }
     }
-    Logger.log("Selected = " + selectedBeaverIds)
     var confirmationMessage = "Assign " + names + " for service date on " + formattedDate + " ?"
+    
+    // To writeToLog
+    var serviceLanguage = sheet.getRange("c3").getValue().charAt(0)
+    var pastorName = sheet.getRange("c4").getValue()
+    var deceasedName = sheet.getRange("c5").getValue()
+    var formattedDateForLog = Utilities.formatDate(new Date(serviceDate), "GMT+8", "YYYY-MM-dd");
+    var service = new Service(formattedDateForLog, serviceLanguage, '', pastorName, deceasedName)
     
     var ui = SpreadsheetApp.getUi()
     var alert = ui.alert("Confirm Assignment", confirmationMessage, ui.ButtonSet.YES_NO)
     
     if (alert == ui.Button.YES) {
       confirmAssignment(selectedBeaverIds, serviceDate)
+      writeToLog(service, selectedBeaverIds)
     }    
   } else {
     showAlert("Cannot find sheet name Recommendation");
@@ -38,7 +46,7 @@ function confirmAssignment(selectedBeaverIds, serviceDate) {
     for (var u = 0; u < selectedBeaverIds.length; u++) {
       updateMasterList(selectedBeaverIds[u], serviceDate)
     }
-  showAlert("Master list updated")
+  showAlert("Master list and Server's log are updated.")
 }
 
 function updateMasterList(id, serviceDate) {
@@ -68,5 +76,28 @@ function updateMasterList(id, serviceDate) {
     }
   } else {
     showAlert("Cannot find sheet");
+  }
+}
+
+function testGettingInfo() {
+  var document = SpreadsheetApp.openById(getDocumentId());
+  var sheet = document.getSheetByName("Recommendation");
+  if (sheet != null) {
+    var serviceLanguage = sheet.getRange("c3").getValue().charAt(0)
+    var pastorName = sheet.getRange("c4").getValue()
+    var nameOfDeceased = sheet.getRange("c5").getValue()
+    
+    Logger.log(serviceLanguage)
+    Logger.log(pastorName)
+    Logger.log(nameOfDeceased)
+    
+    var serviceDateCell = sheet.getRange("c1");
+    var serviceDate = serviceDateCell.getValue();
+    var formattedDateForLog = Utilities.formatDate(new Date(serviceDate), "GMT+8", "YYYY-MM-dd");
+    
+    Logger.log(formattedDateForLog)
+    
+  } else {
+    showAlert("Cannot find sheet name Recommendation");
   }
 }
